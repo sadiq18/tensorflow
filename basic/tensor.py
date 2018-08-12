@@ -40,3 +40,5 @@ print 'prod_y:' ,sess.run(prod_y)
 print 'final_div:' ,sess.run(final_div)
 print 'final_mean:' ,sess.run(final_mean)
 
+sess.close()
+

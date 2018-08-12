@@ -1,6 +1,6 @@
 import tensorflow as tf
 
-# constant variables
+# constant
 a=tf.constant(6.5, name='A')
 b=tf.constant(3.4, name='B')
 c=tf.constant(3.0, name='C')
