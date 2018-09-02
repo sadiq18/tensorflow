@@ -32,7 +32,7 @@ model.add(Dense(16,input_shape=(4,),
 model.add(Dense(3,name='Output_Layer',
                 activation='softmax'))
 
-model.compile(optimizer='adam',
+model.compile(optimizer='sgd',
               loss='categorical_crossentropy',
               metrics=['accuracy'])
 
