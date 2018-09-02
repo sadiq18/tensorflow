@@ -32,10 +32,15 @@ model.add(Dense(16,input_shape=(4,),
 model.add(Dense(3,name='Output_Layer',
                 activation='softmax'))
 
-model.compile(optimizer='sgd',
+model.compile(optimizer='adam',
               loss='categorical_crossentropy',
               metrics=['accuracy'])
 
-model.fit(train_X,train_y,epochs=20,batch_size=2,verbose=1)
+model.fit(train_X,train_y,epochs=15,batch_size=2,verbose=1)
 
-result = model.predict(test_X)
+#result = model.predict(test_X)
+
+
+loss,accuracy = model.evaluate(test_X,test_y,verbose=0)
+print "Loss : ", loss
+print "Accuracy : ", accuracy
