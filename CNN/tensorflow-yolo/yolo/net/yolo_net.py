@@ -14,7 +14,7 @@ import tensorflow as tf
 import numpy as np
 import re
 
-from net import Net
+from yolo.net.net import Net
 
 class YoloNet(Net):
     
