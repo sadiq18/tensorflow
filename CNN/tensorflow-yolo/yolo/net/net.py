@@ -75,13 +75,13 @@ class Net(object):
             tf.add_to_collection('losses',weight_decay)
         return var
     
-    def conv2d(self, scope, input_shape, kernel_size, stride=1, pretrain=True, train=True):
+    def conv2d(self, scope, input_data, kernel_size, stride=1, pretrain=True, train=True):
         """
             Convolutional layer
             
             Args:
                 scope: variable_scope name
-                input_shape: 4-D tensor [batch_size, height, width, depth]
+                input_data: 4-D tensor [batch_size, height, width, depth]
                 kernel_size: [k_height, k_width, in_channel, out_channel]
                 stride: int32
                 
@@ -94,19 +94,21 @@ class Net(object):
                                                       shape=kernel_size,
                                                       stddev=5e-2,
                                                       wd=self.weight_decay,
-                                                      pretrain,train)
-            conv = tf.nn.conv2d(input_shape,kernel,[1, stride, stride, 1], padding='SAME')
+                                                      pretrain=pretrain,
+                                                      train=train)
+            conv = tf.nn.conv2d(input_data,kernel,[1, stride, stride, 1], padding='SAME')
             biases = self._variable_on_cpu('biases',kernel_size[3:],tf.constant_initializer(0.0),pretrain,train)
+            bias = tf.nn.bias_add(conv, biases)
             conv1 = self.leaky_relu(bias)
             
         return conv1
     
-    def max_pool(self, input_size, kernel_size, stride):
+    def max_pool(self, input_data, kernel_size, stride):
         """
             Max Pool Layer
             
             Args:
-                input_size: 4-D tensor [batch_size, height, width, depth]
+                input_data: 4-D tensor [batch_size, height, width, depth]
                 kernel_size: [k_height, k_width]
                 stride: int32
                 
@@ -114,28 +116,30 @@ class Net(object):
                 output: 4-D tensor [batch_size, height/stride, width/stride, depth]
         """
         
-        return tf.nn.max_pool(input_size, ksize=[1, kernel_size[0], kernel_size[1], 1],
+        return tf.nn.max_pool(input_data, ksize=[1, kernel_size[0], kernel_size[1], 1],
                                                  strides=[1, stride, stride, 1],
                                                  padding='SAME')
     
-    def local(self, scope, input_size, in_dimension, out_dimension, leaky=True, pretrain=True, train=True):
+    def local(self, scope, input_data, in_dimension, out_dimension, leaky=True, pretrain=True, train=True):
         """
             Fully connection layer
             
             Args:
                 scope: variable scope name
-                input_size: [batch_size, ???]
+                input_data: [batch_size, ???]
                 out_dimension: int32
                 
             Returns:
                 output: 2-D tensor [batch_size, out_dimension]
         """
         with tf.variable_scope(scope) as scope:
-            reshape = tf.reshape(input_size,tf.shape(input_size)[0],-1)
+            reshape = tf.reshape(input_data,tf.shape(input_data)[0],-1)
             
             weights = self._variable_with_weight_decay('weights', shape=[in_dimension,out_dimension],
-                                                       stddev=0.04, wd=self.weight_decay,pretrain,train)
-            biases = self._variable_on_cpu('biases',[out_dimension],tf.constant_initializer(0.0),pretrain,train)
+                                                       stddev=0.04, wd=self.weight_decay,
+                                                       pretrain=pretrain,train=train)
+            biases = self._variable_on_cpu('biases',[out_dimension],tf.constant_initializer(0.0),
+                                           pretrain=pretrain,train=train)
             local = tf.matmul(reshape, weights) + biases
             
             if leaky:
